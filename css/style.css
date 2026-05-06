@@ -105,11 +105,11 @@ body {
     }
 
     40% {
-        bottom: 220px;
+        bottom: 280px;
     }
 
     50% {
-        bottom: 220px;
+        bottom: 280px;
     }
 
     100% {
@@ -119,39 +119,46 @@ body {
 
 .clouds {
     position: absolute;
-    width: 200px;
-    opacity: 0.85;
+    width: 160px;
+    height: auto;
+    /* opacity: 0.55; */
+    image-rendering: pixelated;
+}
+
+.clouds img {
+    width: 100%;
+    height: auto;
 }
 
 .cloud1 {
-    top: 25px;
-    animation: cloud1 28s linear infinite;
+    top: 30px;
+    animation: cloud1 40s linear infinite;
 }
 
 .cloud2 {
-    top: 65px;
-    animation: cloud2 32s linear infinite;
-    animation-delay: -16s;
+    top: 80px;
+    animation: cloud2 50s linear infinite;
+    animation-delay: -25s;
 }
 
 .cloud3 {
-    top: 45px;
-    animation: cloud3 24s linear infinite;
-    animation-delay: -12s;
+    top: 55px;
+    animation: cloud3 35s linear infinite;
+    animation-delay: -15s;
 }
 
 @keyframes cloud1 {
-    0% { right: -220px; }
+    0% { right: -80px; }
     100% { right: 100%; }
 }
 
 @keyframes cloud2 {
-    0% { right: -220px; }
+    0% { right: -80px; }
     100% { right: 100%; }
 }
 
 @keyframes cloud3 {
-    0% { right: -220px; }
+    0% { right: -80px; }
     100% { right: 100%; }
 }
 
@@ -356,8 +363,23 @@ body {
     }
 
     .pipe {
-        width: 45px;
+        width: 40px;
         bottom: 80px;
+    }
+
+    @keyframes jump {
+        0% {
+            bottom: 80px;
+        }
+        40% {
+            bottom: 280px;
+        }
+        50% {
+            bottom: 280px;
+        }
+        100% {
+            bottom: 80px;
+        }
     }
 
     .score-board {
@@ -381,7 +403,7 @@ body {
     }
 
     .clouds {
-        width: 120px;
+        width: 60px;
     }
 
     .cloud1 { top: 20px; }
@@ -401,13 +423,28 @@ body {
 
     .mario {
         width: 70px;
-        left: 50px;
-        bottom: 70px;
+        left: 40px;
+        bottom: 60px;
     }
 
     .pipe {
-        width: 40px;
-        bottom: 70px;
+        width: 35px;
+        bottom: 60px;
+    }
+
+    @keyframes jump {
+        0% {
+            bottom: 60px;
+        }
+        40% {
+            bottom: 280px;
+        }
+        50% {
+            bottom: 280px;
+        }
+        100% {
+            bottom: 60px;
+        }
     }
 
     .coin {
@@ -419,7 +456,7 @@ body {
     }
 
     .clouds {
-        width: 100px;
+        width: 50px;
     }
 
     .developer {

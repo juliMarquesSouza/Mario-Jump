@@ -160,20 +160,22 @@ function gameLoop() {
     pipePosition += (boardWidth / (pipeSpeed * 60));
     pipe.style.right = pipePosition + 'px';
     
-    const pipeLeft = boardWidth - pipePosition - 55;
-    const marioLeft = 100;
-    const marioRight = 200;
-    const pipeRight = pipeLeft + 55;
+    const pipeWidth = parseInt(getComputedStyle(pipe).width) || 55;
+    const pipeLeft = boardWidth - pipePosition - pipeWidth;
+    const marioLeft = parseInt(getComputedStyle(mario).left);
+    const marioWidth = parseInt(getComputedStyle(mario).width);
+    const marioRight = marioLeft + marioWidth;
+    const pipeRight = pipeLeft + pipeWidth;
     
-    const marioBottom = parseInt(getComputedStyle(mario).bottom) || 90;
-    const isOnGround = marioBottom <= 100;
+    const marioBottom = parseInt(getComputedStyle(mario).bottom);
+    const groundLevel = marioBottom <= 100;
     
     if (pipePosition > boardWidth + 80) {
         pipePosition = -80;
         pipePassedThisCycle = false;
     }
     
-    if (pipeLeft > 100 && pipeLeft < 160 && !pipePassedThisCycle) {
+    if (pipeLeft > marioLeft + 10 && pipeLeft < marioRight && !pipePassedThisCycle) {
         pipePassedThisCycle = true;
         pipesPassed++;
         score += 1;
@@ -185,7 +187,7 @@ function gameLoop() {
         }
     }
     
-    if (isOnGround && marioRight > pipeLeft + 10 && marioLeft < pipeRight - 10) {
+    if (groundLevel && marioRight > pipeLeft + 10 && marioLeft < pipeRight - 10) {
         gameOver();
         return;
     }
