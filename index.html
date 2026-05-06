@@ -1,22 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./css/style.css">
-    <script src="./js/script.js" defer></script>
-
-    <title>Mario Jump</title>
+    <title>Super Mario Jump</title>
 </head>
 <body>
+    <div class="game-container">
+        <div class="score-board">
+            <div class="score-item">
+                <span class="score-label">SCORE</span>
+                <span class="score-value" id="score">0</span>
+            </div>
+        </div>
 
-    <div class="game-board">
-        <img src="./imagens/clouds.png" class="clouds">
-        <img src="./imagens/mario.gif" class="mario">
-        <img src="./imagens/pipe.png" class="pipe">
-        <img class="game-over-img" src="./imagens/perdeu.png" alt="Game Over">
-    </div>   
-    
+        <div class="game-board" id="gameBoard">
+            <img src="./imagens/clouds.png" class="clouds cloud1">
+            <img src="./imagens/clouds.png" class="clouds cloud2">
+            <img src="./imagens/clouds.png" class="clouds cloud3">
+            
+            <img src="./imagens/mario.gif" class="mario" id="mario">
+            
+            <img src="./imagens/pipe.png" class="pipe">
+            
+            <div id="coinsContainer"></div>
+            
+            <div class="ground"></div>
+
+            <div class="start-screen" id="startScreen">
+                <div class="mario-logo">
+                    <img src="./imagens/mario.gif" alt="Mario">
+                </div>
+                <h1 class="game-title">SUPER MARIO JUMP</h1>
+                <div class="instructions">
+                    <p class="instruction-item">
+                        <span class="key">ESPAÇO</span> ou <span class="tap-icon">TAP</span> para pular
+                    </p>
+                    <p class="instruction-item">Colete moedas e evite os canos!</p>
+                </div>
+                <button class="start-btn" id="startBtn">JOGAR</button>
+            </div>
+
+            <div class="game-over-screen hidden" id="gameOverScreen">
+                <img src="./imagens/perdeu.png" class="game-over-img" alt="Game Over">
+                <div class="final-score">
+                    <span>PONTUAÇÃO</span>
+                    <span class="final-score-value" id="finalScore">0</span>
+                </div>
+                <button class="restart-btn" id="restartBtn">JOGAR NOVAMENTE</button>
+            </div>
+        </div>
+
+        <div class="developer">Desenvolvido por: Juliana Marques</div>
+    </div>
+
+    <script src="./js/script.js"></script>
 </body>
 </html>

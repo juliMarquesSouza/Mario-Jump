@@ -1,54 +1,271 @@
-const mario = document.querySelector('.mario');
+const mario = document.getElementById('mario');
 const pipe = document.querySelector('.pipe');
-const clouds = document.querySelector('.clouds');
-const gameOverImg = document.querySelector('.game-over-img');
+const coinsContainer = document.getElementById('coinsContainer');
+const scoreDisplay = document.getElementById('score');
+const startScreen = document.getElementById('startScreen');
+const gameOverScreen = document.getElementById('gameOverScreen');
+const startBtn = document.getElementById('startBtn');
+const restartBtn = document.getElementById('restartBtn');
+const finalScoreDisplay = document.getElementById('finalScore');
+const gameBoard = document.getElementById('gameBoard');
 
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+let score = 0;
+let isJumping = false;
 let isGameOver = false;
+let isGameStarted = false;
+let coins = [];
+let jumpY = 0;
+let jumpVelocity = 0;
+let jumpAnimationId = null;
+let gameLoopId = null;
+let coinInterval = null;
 
+const coinSVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#ffd700" stroke="#b8860b" stroke-width="5"/><text x="50" y="65" font-size="40" text-anchor="middle" fill="#b8860b" font-weight="bold">$</text></svg>';
 
-const jump = () => {
-    if (isGameOver) return;
+function createOscillator(frequency, type, duration, volume = 0.3) {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    
+    gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + duration);
+}
+
+function playJumpSound() {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+    createOscillator(400, 'square', 0.1, 0.2);
+}
+
+function playCoinSound() {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+    createOscillator(988, 'square', 0.1, 0.2);
+    setTimeout(() => createOscillator(1319, 'square', 0.15, 0.15), 100);
+}
+
+function playGameOverSound() {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+    createOscillator(200, 'sawtooth', 0.3, 0.3);
+    setTimeout(() => createOscillator(150, 'sawtooth', 0.4, 0.25), 200);
+}
+
+function animateScore() {
+    scoreDisplay.classList.add('pop');
+    setTimeout(() => scoreDisplay.classList.remove('pop'), 200);
+}
+
+function jump() {
+    if (isGameOver || isJumping || !isGameStarted) return;
+
+    playJumpSound();
+
+    isJumping = true;
+
+    mario.classList.remove('jump');
+
+    void mario.offsetWidth;
+
     mario.classList.add('jump');
 
     setTimeout(() => {
         mario.classList.remove('jump');
-    }, 500);
+        isJumping = false;
+    }, 700);
 }
 
-const loop = setInterval(() => {
+function createCoin() {
+    const coin = document.createElement('div');
+    coin.className = 'coin';
+    coin.innerHTML = `<img src="data:image/svg+xml,${encodeURIComponent(coinSVG)}" class="coin-icon"/>`;
+    
+    const minY = 130;
+    const maxY = 280;
+    const randomY = minY + Math.random() * (maxY - minY);
+    
+    coin.style.bottom = randomY + 'px';
+    coin.style.right = '-50px';
+    
+    coinsContainer.appendChild(coin);
+    coins.push({
+        element: coin,
+        right: -50,
+        bottom: randomY,
+        collected: false
+    });
+}
 
-    const pipePosition = pipe.offsetLeft;
-    const marioPosition = +window.getComputedStyle(mario).bottom.replace('px', '');
+function updateCoins() {
+    const boardWidth = gameBoard.offsetWidth;
+    
+    coins = coins.filter(coin => {
+        if (coin.collected) return false;
+        
+        coin.right += 0.5;
+        coin.element.style.right = coin.right + 'px';
+        
+        if (coin.right > boardWidth + 50) {
+            coin.element.remove();
+            return false;
+        }
+        
+        const marioRect = mario.getBoundingClientRect();
+        const coinRect = coin.element.getBoundingClientRect();
+        
+        if (marioRect.right > coinRect.left + 8 && 
+            marioRect.left < coinRect.right - 8 &&
+            marioRect.bottom > coinRect.top + 8 &&
+            marioRect.top < coinRect.bottom - 8) {
+            
+            coin.collected = true;
+            coin.element.classList.add('collected');
+            score += 5;
+            scoreDisplay.textContent = score;
+            animateScore();
+            playCoinSound();
+            
+            setTimeout(() => {
+                coin.element.remove();
+            }, 300);
+            return false;
+        }
+        
+        return true;
+    });
+}
 
+function checkCollision() {
+    const marioRect = mario.getBoundingClientRect();
+    const pipeRect = pipe.getBoundingClientRect();
 
-    if (pipePosition <= 120 && pipePosition > 0 && marioPosition < 80) {
+    const marioLeft = marioRect.left + 25;
+    const marioRight = marioRect.right - 25;
+    const marioBottom = marioRect.bottom - 20;
 
-        pipe.style.animation = 'none';
-        pipe.style.left = `${pipePosition}px`;
+    const pipeLeft = pipeRect.left + 10;
+    const pipeRight = pipeRect.right - 10;
+    const pipeTop = pipeRect.top + 10;
 
-        mario.style.animation = 'none';
-        mario.style.bottom = `${marioPosition}px`;
+    return (
+        marioRight > pipeLeft &&
+        marioLeft < pipeRight &&
+        marioBottom > pipeTop
+    );
+}
 
-        mario.src = './imagens/game-over.png';
-        mario.style.width = '75px';
-        mario.style.marginLeft = '50px';
-
-        const cloudsPosition = clouds.offsetLeft;
-
-        clouds.style.animation = 'none';
-        clouds.style.left = `${cloudsPosition}px`;
-
-       gameOverImg.style.display = 'block';
-
-        clearInterval(loop);
-        isGameOver = true;
+function gameLoop() {
+    if (isGameOver || !isGameStarted) return;
+    
+    if (checkCollision()) {
+        gameOver();
+        return;
     }
+    
+    updateCoins();
+    
+    gameLoopId = requestAnimationFrame(gameLoop);
+}
 
-}, 10)
+function gameOver() {
+    isGameOver = true;
+    isGameStarted = false;
+    
+    if (jumpAnimationId) cancelAnimationFrame(jumpAnimationId);
+    if (gameLoopId) cancelAnimationFrame(gameLoopId);
+    if (coinInterval) clearInterval(coinInterval);
+    
+    playGameOverSound();
+    
+    pipe.style.animationPlayState = 'paused';
+    
+    mario.src = './imagens/game-over.png';
+    mario.style.width = '60px';
+    mario.style.left = '100px';
+    
+    setTimeout(() => {
+        finalScoreDisplay.textContent = score;
+        gameOverScreen.classList.remove('hidden');
+    }, 800);
+}
 
-document.addEventListener('keydown', jump);
-document.addEventListener('keydown', () => {
-    if (isGameOver) {
-        location.reload();
+function startGame() {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
     }
+    
+    startScreen.classList.add('hidden');
+    gameOverScreen.classList.add('hidden');
+    
+    score = 0;
+    isGameOver = false;
+    isJumping = false;
+    isGameStarted = true;
+    coins = [];
+    jumpY = 0;
+    jumpVelocity = 0;
+    
+    if (jumpAnimationId) cancelAnimationFrame(jumpAnimationId);
+    if (gameLoopId) cancelAnimationFrame(gameLoopId);
+    
+    scoreDisplay.textContent = '0';
+    mario.src = './imagens/mario.gif';
+    mario.style.width = '100px';
+    mario.style.bottom = '90px';
+    mario.style.left = '100px';
+    
+    pipe.style.animation = 'none';
+    pipe.offsetHeight;
+    pipe.style.animation = 'pipeMove 3s linear infinite';
+    
+    coinsContainer.innerHTML = '';
+    
+    gameLoopId = requestAnimationFrame(gameLoop);
+    
+    coinInterval = setInterval(() => {
+        if (!isGameOver && Math.random() < 0.02) {
+            createCoin();
+        }
+    }, 800);
+}
+
+startBtn.addEventListener('click', startGame);
+restartBtn.addEventListener('click', startGame);
+
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
+        e.preventDefault();
+        if (!startScreen.classList.contains('hidden') || !gameOverScreen.classList.contains('hidden')) {
+            startGame();
+        } else {
+            jump();
+        }
+    }
+});
+
+gameBoard.addEventListener('touchstart', (e) => {
+    if (e.target.closest('.start-btn') || e.target.closest('.restart-btn')) return;
+    e.preventDefault();
+    if (!startScreen.classList.contains('hidden') || !gameOverScreen.classList.contains('hidden')) {
+        startGame();
+    } else {
+        jump();
+    }
+});
+
+document.addEventListener('click', (e) => {
+    if (e.target === startBtn || e.target === restartBtn) return;
 });
