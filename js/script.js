@@ -74,6 +74,7 @@ function animateScore() {
 }
 
 function jump() {
+
     if (isGameOver || isJumping || !isGameStarted) return;
 
     playJumpSound();
@@ -87,24 +88,53 @@ function jump() {
     mario.classList.add('jump');
 
     setTimeout(() => {
+
         mario.classList.remove('jump');
-        isJumping = false;
+
+mario.style.transform = 'translateX(0)';
+
+isJumping = false;
+
     }, 500);
 }
 
 function createCoin() {
+
     const coin = document.createElement('div');
+
     coin.className = 'coin';
-    coin.innerHTML = `<img src="data:image/svg+xml,${encodeURIComponent(coinSVG)}" class="coin-icon"/>`;
-    
-    const minY = 130;
-    const maxY = 280;
+
+    coin.innerHTML = `
+        <img src="data:image/svg+xml,${encodeURIComponent(coinSVG)}" class="coin-icon"/>
+    `;
+
+    let minY;
+    let maxY;
+
+    if (window.innerWidth <= 400) {
+
+        minY = 90;
+        maxY = 170;
+
+    } else if (window.innerWidth <= 600) {
+
+        minY = 110;
+        maxY = 220;
+
+    } else {
+
+        minY = 130;
+        maxY = 280;
+    }
+
     const randomY = minY + Math.random() * (maxY - minY);
-    
+
     coin.style.bottom = randomY + 'px';
+
     coin.style.right = '-50px';
-    
+
     coinsContainer.appendChild(coin);
+
     coins.push({
         element: coin,
         right: -50,
@@ -115,87 +145,126 @@ function createCoin() {
 
 function updateCoins() {
     const boardWidth = gameBoard.offsetWidth;
-    
+
     coins = coins.filter(coin => {
+
         if (coin.collected) return false;
-        
+
         coin.right += 0.5;
+
         coin.element.style.right = coin.right + 'px';
-        
+
         if (coin.right > boardWidth + 50) {
             coin.element.remove();
             return false;
         }
-        
+
         const marioRect = mario.getBoundingClientRect();
+
         const coinRect = coin.element.getBoundingClientRect();
-        
-        if (marioRect.right > coinRect.left + 8 && 
-            marioRect.left < coinRect.right - 8 &&
-            marioRect.bottom > coinRect.top + 8 &&
-            marioRect.top < coinRect.bottom - 8) {
-            
+
+        const mobileCoinOffset = window.innerWidth <= 400 ? 18 : 8;
+
+        const collected =
+            marioRect.right > coinRect.left + mobileCoinOffset &&
+            marioRect.left < coinRect.right - mobileCoinOffset &&
+            marioRect.bottom > coinRect.top + mobileCoinOffset &&
+            marioRect.top < coinRect.bottom - mobileCoinOffset;
+
+        if (collected) {
+
             coin.collected = true;
+
             coin.element.classList.add('collected');
+
             score += 5;
+
             scoreDisplay.textContent = score;
+
             animateScore();
+
             playCoinSound();
-            
+
             setTimeout(() => {
                 coin.element.remove();
             }, 300);
+
             return false;
         }
-        
+
         return true;
     });
 }
 
 function gameLoop() {
     if (isGameOver || !isGameStarted) return;
-    
+
     const boardWidth = gameBoard.offsetWidth;
-    
+
     pipePosition += (boardWidth / (pipeSpeed * 60));
     pipe.style.right = pipePosition + 'px';
-    
+
     const pipeWidth = parseInt(getComputedStyle(pipe).width) || 55;
+
     const pipeLeft = boardWidth - pipePosition - pipeWidth;
+
     const marioLeft = parseInt(getComputedStyle(mario).left);
+
     const marioWidth = parseInt(getComputedStyle(mario).width);
+
     const marioRight = marioLeft + marioWidth;
+
     const pipeRight = pipeLeft + pipeWidth;
-    
+
     const marioBottom = parseInt(getComputedStyle(mario).bottom);
-    const groundLevel = marioBottom <= 100;
-    
+
+    const groundLevel = window.innerWidth <= 400
+        ? marioBottom <= 60
+        : window.innerWidth <= 600
+            ? marioBottom <= 72
+            : marioBottom <= 92;
+
     if (pipePosition > boardWidth + 80) {
         pipePosition = -80;
         pipePassedThisCycle = false;
     }
-    
-    if (pipeLeft > marioLeft + 10 && pipeLeft < marioRight && !pipePassedThisCycle) {
+
+    if (
+        pipeLeft > marioLeft + 10 &&
+        pipeLeft < marioRight &&
+        !pipePassedThisCycle
+    ) {
         pipePassedThisCycle = true;
+
         pipesPassed++;
+
         score += 1;
+
         scoreDisplay.textContent = score;
+
         animateScore();
-        
+
         if (pipesPassed % 10 === 0 && pipeSpeed > 1) {
             pipeSpeed = pipeSpeed * 0.95;
         }
     }
-    
-    if (groundLevel && marioRight > pipeLeft + 10 && marioLeft < pipeRight - 10) {
+
+    const collisionOffset = window.innerWidth <= 600 ? 5 : 10;
+
+    if (
+        groundLevel &&
+        marioRight > pipeLeft + collisionOffset &&
+        marioLeft < pipeRight - collisionOffset
+    ) {
         gameOver();
         return;
     }
-    
+
     updateCoins();
-    
+
     gameLoopId = requestAnimationFrame(gameLoop);
 }
+    
 
 function gameOver() {
     isGameOver = true;
@@ -210,8 +279,7 @@ function gameOver() {
     pipe.style.animationPlayState = 'paused';
     
     mario.src = './imagens/game-over.png';
-    mario.style.width = '60px';
-    mario.style.left = '100px';
+    mario.style.width = window.innerWidth <= 400 ? '46px' : '60px';
     
     setTimeout(() => {
         finalScoreDisplay.textContent = score;
@@ -244,9 +312,24 @@ function startGame() {
     
     scoreDisplay.textContent = '0';
     mario.src = './imagens/mario.gif';
+   if (window.innerWidth <= 400) {
+
+    mario.style.width = '46px';
+    mario.style.bottom = '60px';
+    mario.style.left = '12px';
+
+} else if (window.innerWidth <= 600) {
+
+    mario.style.width = '70px';
+    mario.style.bottom = '70px';
+    mario.style.left = '45px';
+
+} else {
+
     mario.style.width = '100px';
     mario.style.bottom = '90px';
     mario.style.left = '100px';
+}
     
     pipe.style.animation = 'none';
     pipe.style.right = pipePosition + 'px';
