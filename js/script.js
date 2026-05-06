@@ -12,6 +12,9 @@ const gameBoard = document.getElementById('gameBoard');
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
 let score = 0;
+let pipesPassed = 0;
+let pipeSpeed = 3;
+let pipePosition = -80;
 let isJumping = false;
 let isGameOver = false;
 let isGameStarted = false;
@@ -21,6 +24,7 @@ let jumpVelocity = 0;
 let jumpAnimationId = null;
 let gameLoopId = null;
 let coinInterval = null;
+let pipePassedThisCycle = false;
 
 const coinSVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#ffd700" stroke="#b8860b" stroke-width="5"/><text x="50" y="65" font-size="40" text-anchor="middle" fill="#b8860b" font-weight="bold">$</text></svg>';
 
@@ -85,7 +89,7 @@ function jump() {
     setTimeout(() => {
         mario.classList.remove('jump');
         isJumping = false;
-    }, 700);
+    }, 500);
 }
 
 function createCoin() {
@@ -148,29 +152,40 @@ function updateCoins() {
     });
 }
 
-function checkCollision() {
-    const marioRect = mario.getBoundingClientRect();
-    const pipeRect = pipe.getBoundingClientRect();
-
-    const marioLeft = marioRect.left + 25;
-    const marioRight = marioRect.right - 25;
-    const marioBottom = marioRect.bottom - 20;
-
-    const pipeLeft = pipeRect.left + 10;
-    const pipeRight = pipeRect.right - 10;
-    const pipeTop = pipeRect.top + 10;
-
-    return (
-        marioRight > pipeLeft &&
-        marioLeft < pipeRight &&
-        marioBottom > pipeTop
-    );
-}
-
 function gameLoop() {
     if (isGameOver || !isGameStarted) return;
     
-    if (checkCollision()) {
+    const boardWidth = gameBoard.offsetWidth;
+    
+    pipePosition += (boardWidth / (pipeSpeed * 60));
+    pipe.style.right = pipePosition + 'px';
+    
+    const pipeLeft = boardWidth - pipePosition - 55;
+    const marioLeft = 100;
+    const marioRight = 200;
+    const pipeRight = pipeLeft + 55;
+    
+    const marioBottom = parseInt(getComputedStyle(mario).bottom) || 90;
+    const isOnGround = marioBottom <= 100;
+    
+    if (pipePosition > boardWidth + 80) {
+        pipePosition = -80;
+        pipePassedThisCycle = false;
+    }
+    
+    if (pipeLeft > 100 && pipeLeft < 160 && !pipePassedThisCycle) {
+        pipePassedThisCycle = true;
+        pipesPassed++;
+        score += 1;
+        scoreDisplay.textContent = score;
+        animateScore();
+        
+        if (pipesPassed % 10 === 0 && pipeSpeed > 1) {
+            pipeSpeed = pipeSpeed * 0.95;
+        }
+    }
+    
+    if (isOnGround && marioRight > pipeLeft + 10 && marioLeft < pipeRight - 10) {
         gameOver();
         return;
     }
@@ -211,6 +226,10 @@ function startGame() {
     gameOverScreen.classList.add('hidden');
     
     score = 0;
+    pipesPassed = 0;
+    pipeSpeed = 3;
+    pipePosition = -80;
+    pipePassedThisCycle = false;
     isGameOver = false;
     isJumping = false;
     isGameStarted = true;
@@ -228,15 +247,14 @@ function startGame() {
     mario.style.left = '100px';
     
     pipe.style.animation = 'none';
-    pipe.offsetHeight;
-    pipe.style.animation = 'pipeMove 3s linear infinite';
+    pipe.style.right = pipePosition + 'px';
     
     coinsContainer.innerHTML = '';
     
     gameLoopId = requestAnimationFrame(gameLoop);
     
     coinInterval = setInterval(() => {
-        if (!isGameOver && Math.random() < 0.02) {
+        if (!isGameOver && Math.random() < 0.15) {
             createCoin();
         }
     }, 800);
