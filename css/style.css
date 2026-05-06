@@ -96,20 +96,17 @@ body {
 }
 
 .jump {
-    animation: jump 500ms ease-out;
+    animation: jump 580ms ease-in-out;
 }
 
 @keyframes jump {
+
     0% {
         bottom: 90px;
     }
 
-    40% {
-        bottom: 280px;
-    }
-
     50% {
-        bottom: 280px;
+        bottom: 260px;
     }
 
     100% {
@@ -453,6 +450,15 @@ body {
         bottom: 60px;
     }
 
+    .mario {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* .jump {
+    animation: jumpMobile 520ms cubic-bezier(0.25, 0.8, 0.35, 1);
+} */
+
     .pipe {
         width: 24px;
         bottom: 60px;
@@ -483,16 +489,24 @@ body {
         bottom: 60px;
     }
 
-    25% {
-        bottom: 105px;
+    20% {
+        bottom: 95px;
+    }
+
+    40% {
+        bottom: 118px;
     }
 
     50% {
-        bottom: 128px;
+        bottom: 125px;
     }
 
-    75% {
-        bottom: 105px;
+    60% {
+        bottom: 118px;
+    }
+
+    80% {
+        bottom: 95px;
     }
 
     100% {

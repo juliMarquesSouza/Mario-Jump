@@ -85,7 +85,11 @@ function jump() {
 
     void mario.offsetWidth;
 
-    mario.classList.add('jump');
+    if (window.innerWidth <= 400) {
+    mario.style.transform = 'translateX(0)';
+}
+
+mario.classList.add('jump');
 
     setTimeout(() => {
 
@@ -299,6 +303,18 @@ function startGame() {
     pipesPassed = 0;
     pipeSpeed = 3;
     pipePosition = -80;
+    if (window.innerWidth <= 400) {
+
+    pipeSpeed = 2.1;
+
+} else if (window.innerWidth <= 600) {
+
+    pipeSpeed = 2.5;
+
+} else {
+
+    pipeSpeed = 3;
+}
     pipePassedThisCycle = false;
     isGameOver = false;
     isJumping = false;
