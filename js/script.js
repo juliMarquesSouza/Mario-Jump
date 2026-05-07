@@ -366,8 +366,7 @@ function startGame(speed) {
 
     coinsContainer.innerHTML = '';
 
-    setLoop(6).then(() => console.log(`Loop ${countLoop} Finalizado`))
-    // gameLoopId = requestAnimationFrame(gameLoop, 100);
+    setLoop(6);
 
     coinInterval = setInterval(() => {
         if (!isGameOver && Math.random() < 0.15) {
