@@ -11,6 +11,7 @@ const gameBoard = document.getElementById('gameBoard');
 
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
+let countLoop = 0;
 let score = 0;
 let pipesPassed = 0;
 let pipeSpeed = 3;
@@ -200,9 +201,24 @@ function updateCoins() {
     });
 }
 
-function gameLoop() {
-    if (isGameOver || !isGameStarted) return;
+function setLoop(speed) {
+    return new Promise((resolve, reject) => {
+        countLoop++;
+        const result = gameLoop();
 
+        setTimeout(() => {
+            if(result) {
+                setLoop(speed);
+            }
+
+            resolve();
+        }, speed);
+    });
+    // gameLoopId = requestAnimationFrame(gameLoop);
+}
+
+function gameLoop(calback) {
+    if (isGameOver || !isGameStarted) return;
     const boardWidth = gameBoard.offsetWidth;
 
     pipePosition += (boardWidth / (pipeSpeed * 60));
@@ -261,12 +277,11 @@ function gameLoop() {
         marioLeft < pipeRight - collisionOffset
     ) {
         gameOver();
-        return;
+        return false;
     }
-
+    
     updateCoins();
-
-    gameLoopId = requestAnimationFrame(gameLoop);
+    return true;
 }
 
 
@@ -305,14 +320,14 @@ function startGame(speed) {
     pipePosition = -80;
 
     if (window.innerWidth <= 400) {
-        pipeSpeed =  2.1;
+        pipeSpeed = 2.1;
     } else if (window.innerWidth <= 600) {
-        pipeSpeed =  2.5;
+        pipeSpeed = 2.5;
     } else {
-        pipeSpeed =  3;
+        pipeSpeed = 3;
     }
 
-    alert("Velocidade da tela: " + pipeSpeed);
+    // alert("Velocidade da tela: " + pipeSpeed);
 
     pipePassedThisCycle = false;
     isGameOver = false;
@@ -351,7 +366,8 @@ function startGame(speed) {
 
     coinsContainer.innerHTML = '';
 
-    gameLoopId = requestAnimationFrame(gameLoop);
+    setLoop(6).then(() => console.log(`Loop ${countLoop} Finalizado`))
+    // gameLoopId = requestAnimationFrame(gameLoop, 100);
 
     coinInterval = setInterval(() => {
         if (!isGameOver && Math.random() < 0.15) {
