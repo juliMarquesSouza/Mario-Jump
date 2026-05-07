@@ -13,7 +13,7 @@ O projeto ainda está em desenvolvimento e a proposta é continuar melhorando co
 - efeitos sonoros
 - otimizações para mobile
 - novas funcionalidades
-- 
+  
 ## 🛠️ Tecnologias utilizadas
 
 - HTML5
