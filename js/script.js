@@ -202,18 +202,16 @@ function updateCoins() {
 }
 
 function setLoop(speed) {
-    return new Promise((resolve, reject) => {
-        countLoop++;
-        const result = gameLoop();
+    countLoop++;
+    const result = gameLoop();
 
-        setTimeout(() => {
-            if(result) {
-                setLoop(speed);
-            }
+    setTimeout(() => {
+        if (result) {
+            setLoop(speed);
+        }
 
-            resolve();
-        }, speed);
-    });
+        resolve();
+    }, speed);
     // gameLoopId = requestAnimationFrame(gameLoop);
 }
 
@@ -279,7 +277,7 @@ function gameLoop(calback) {
         gameOver();
         return false;
     }
-    
+
     updateCoins();
     return true;
 }
