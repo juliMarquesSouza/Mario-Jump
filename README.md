@@ -48,7 +48,11 @@ Além da diversão, esse projeto foi criado com o objetivo de praticar:
 
 
 ### 📱 Mobile
-> <img width="828" height="1365" alt="WhatsApp Image 2026-05-07 at 15 16 31" src="https://github.com/user-attachments/assets/a2ce7e7d-f526-4a11-9289-6465a4220e79" />
+> <img 
+  width="250" 
+  alt="WhatsApp Image 2026-05-07 at 15 16 31" 
+  src="https://github.com/user-attachments/assets/a2ce7e7d-f526-4a11-9289-6465a4220e79" 
+/>
 
 ---
 
